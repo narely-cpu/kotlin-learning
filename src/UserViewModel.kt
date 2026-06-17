@@ -3,22 +3,78 @@ import java.util.UUID
 class UserViewModel() {
 
     private var id: String? = null
-    private val name: String? = null
-    private val email: String? = null
-    private val password: String? = null
-    private val type: UserType? = null
-    private val pdmId: String? = null
+    private var name: String? = null
+    private var email: String? = null
+    private var password: String? = null
+    private var type: UserType? = null
+    private var pdmId: String? = null
     private var active: Boolean = false
     private var listUsers: MutableList<UserData> = mutableListOf()
 
     fun createUser() {
         println(" ------ Create User -------")
+        val name = addName()
+        val email = addEmail()
+        val password = addPassword()
+        val type = addType()
+        var newUser: UserData? = null
+
+        if (type == UserType.COLLABORATOR) {
+            val pdmList = this.listUsers.filter { it.type == UserType.PDM }.toMutableList()
+            if (pdmList.isEmpty()) {
+                println("There is no registered PDM. First, register a PDM.")
+            } else {
+                println("Which PDM will be associated with the user?")
+                val pdmId = searchUserByIndex(pdmList)?.id
+                if (pdmId != null) {
+                    this.pdmId = pdmId
+                    newUser = create(name, email, password, type, pdmId)
+                }
+            }
+        } else if (type == UserType.PDM) {
+            newUser = create(name, email, password, type)
+        }
+        if (newUser != null) {
+            println("User is created.")
+            listUsers.add(newUser)
+        } else {
+            println("No user created. Try Again.")
+        }
+    }
+
+    fun readUser(): UserData? {
+        println(" ------ Read User -------")
+        if (listUsers.isEmpty()) {
+            println("There is no registered Users.")
+            return null
+        } else {
+            println("What is the user do you want to read?")
+            return searchUserByIndex(listUsers)
+        }
+    }
+
+    private fun addName(): String {
         println("What is the username you want to create?")
         val name = readln()
+        this.name = name
+        return name
+    }
+
+    private fun addEmail(): String {
         println("What is the user's email address?")
         val email = readln()
+        this.email = email
+        return email
+    }
+
+    private fun addPassword(): String {
         println("What is the user's password?")
         val password = readln()
+        this.password = password
+        return password
+    }
+
+    private fun addType(): UserType {
         println("What type of user do you have?")
         println("1. PDM")
         println("2. COLLABORATOR")
@@ -30,72 +86,20 @@ class UserViewModel() {
             "3" -> UserType.ADMIN
             else -> UserType.COLLABORATOR
         }
-        var newUser: UserData? = null
-        if (userType == UserType.COLLABORATOR) {
-            val pdmList = this.listUsers.filter { it.type == UserType.PDM }
-            if (pdmList.isEmpty()) {
-                println("There is no registered PDM. First, register a PDM.")
-            } else {
-                println("Which PDM will be associated with the user?")
-                for ((index, value) in pdmList.withIndex()) {
-                    println("$index -> \"${value.email}\"")
-                }
-                val pdmIndexInput = readln()
-                val pdmId = listUsers[pdmIndexInput.toInt()].id
-                newUser = create()
-            }
-        } else if (userType == UserType.PDM) {
-            newUser = create()
-        }
-        if (newUser != null) {
-            println("User is now created.")
-            println(newUser)
-            listUsers.add(newUser)
-        } else {
-            println("No user created. Try Again.")
-        }
+        this.type = userType
+        return userType
     }
 
-    fun readUser(): UserData? {
-        println(" ------ Read User -------")
-        for ((index, value) in listUsers.withIndex()) {
-            println("$index -> \"${value.name}\"")
-        }
-        if (listUsers.isEmpty()) {
-            println("There is no registered Users.")
-            return null
-        } else {
-            println("What is the user do you want to read?")
-            val userIndexInput = readln()
-            if (listUsers.count() -1 > userIndexInput.toInt()) {
-                val userSelected = listUsers[userIndexInput.toInt()]
-                if (userSelected != null) {
-                    val userObject = UserData(userSelected.id, userSelected.name, userSelected.email,
-                        userSelected.password, userSelected.type,
-                        userSelected.pdmId, userSelected.active)
-                    print("data user: $userObject")
-                    return userObject
-                } else {
-                    println("No found user. Try Again.")
-                    return null
-                }
-            } else {
-                println("There is no registered Users.")
-                return null
-            }
-
-        }
-    }
-
-    fun create(): UserData? {
+    private fun create(name: String, email: String, password: String, type: UserType, pdmId: String? = null): UserData? {
         this.id = UUID.randomUUID().toString()
-        if (!validatePassword(this.password) || !validateInternalEmail(this.email)) {
+        if (!validatePassword(password) || !validateInternalEmail(email)) {
             return null
         } else {
             this.active = true
-            val user = UserData(this.id, this.name, this.email,
-                this.password, this.type,
-                this.pdmId, this.active = true)
+            val user = UserData(id, name, email,
+                password, type,
+                pdmId, true
+            )
             return user
         }
     }
@@ -115,7 +119,7 @@ class UserViewModel() {
     }
 
     private fun validatePassword(password: String): Boolean {
-        if (password == null || password.length < 8) {
+        if (password.length < 8) {
             println("Password must be at least 8 characters long")
             return false
         }
@@ -132,5 +136,29 @@ class UserViewModel() {
             return false
         }
         return true
+    }
+
+    private fun searchUserByIndex(listUsers: MutableList<UserData>): UserData? {
+        for ((index, value) in listUsers.withIndex()) {
+            println("$index -> \"${value.name}\"")
+        }
+        val userIndexInput = readln()
+        if (userIndexInput.toDoubleOrNull() != null) {
+            return validateIndexInput(userIndexInput.toInt(), listUsers)
+        } else {
+            println("Enter the index of a valid user.")
+            return null
+        }
+    }
+
+    private fun validateIndexInput(userIndexInput: Int, listUsers: MutableList<UserData>): UserData? {
+        if (userIndexInput >= listUsers.count() || userIndexInput < 0) {
+            println("Enter the index of a valid user.")
+            return null
+        } else {
+            val userSelected = listUsers[userIndexInput]
+            print("data user: $userSelected")
+            return userSelected
+        }
     }
 }

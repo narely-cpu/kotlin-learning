@@ -13,8 +13,8 @@ fun main() {
         val choice = when (choiceInput) {
             "1" -> userViewModel.createUser()
             "2" -> userViewModel.readUser()
-            "3" -> userViewModel.create()
-            "4" -> userViewModel.create()
+            "3" -> userViewModel.createUser()
+            "4" -> userViewModel.createUser()
             else -> continue
         }
     }
