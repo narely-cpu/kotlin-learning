@@ -1,7 +1,7 @@
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 fun main() {
-    var userViewModel: UserViewModel = UserViewModel()
+    val userViewModel: UserViewModel = UserViewModel()
     while (true) {
 
         println("What do you want to do?")
@@ -13,7 +13,7 @@ fun main() {
         val choice = when (choiceInput) {
             "1" -> userViewModel.createUser()
             "2" -> userViewModel.readUser()
-            "3" -> userViewModel.createUser()
+            "3" -> userViewModel.updateUser()
             "4" -> userViewModel.createUser()
             else -> continue
         }

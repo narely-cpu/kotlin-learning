@@ -53,6 +53,57 @@ class UserViewModel() {
         }
     }
 
+    fun updateUser() {
+        println(" ------ Update User -------")
+        if (listUsers.isEmpty()) {
+            println("There is no registered Users.")
+        } else {
+            println("What is the user do you want to update?")
+            var currentUser = searchUserByIndex(listUsers)
+            println("Which user attribute would you like to update?")
+            if (currentUser != null) {
+                var attributesCurrentUser = mutableMapOf(
+                    "name" to currentUser.name,
+                    "email" to currentUser.email,
+                    "password" to currentUser.password,
+                    "type" to currentUser.type,
+                    "pdmId" to currentUser.pdmId,
+                )
+
+                attributesCurrentUser.mapValues { (key, value) ->
+                    println("$key: $value ")
+                    println("Do you want to modify this attribute? (0 -> No) (1 -> Yes)")
+                    val choiceInput = readln()
+                    if (choiceInput == "1") {
+                        println("Enter the new value")
+                        val newValueInput = readln()
+                        if (key == "name" || key == "email" || key == "password" || key == "pdmId") {
+                            attributesCurrentUser[key] = newValueInput
+                        } else {
+                            println("1 -> Collaborator")
+                            println("2 -> PDM")
+                            println("3 -> Admin")
+                            val typeInput = readln()
+                            when (typeInput) {
+                                "1" -> attributesCurrentUser[key] = UserType.COLLABORATOR
+                                "2" -> attributesCurrentUser[key] = UserType.PDM
+                                "3" -> attributesCurrentUser[key] = UserType.PDM
+                            }
+                        }
+                    }
+                }
+
+                currentUser.apply {
+                    name = attributesCurrentUser["name"] as String
+                    email = attributesCurrentUser["email"] as String
+                    password = attributesCurrentUser["password"] as String
+                    type = attributesCurrentUser["type"] as UserType
+                    pdmId = attributesCurrentUser["pdmId"] as String?
+                }
+            }
+        }
+    }
+
     private fun addName(): String {
         println("What is the username you want to create?")
         val name = readln()

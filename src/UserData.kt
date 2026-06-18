@@ -1,3 +1,3 @@
-data class UserData(val id: String? = null, val name: String, val email: String, val password: String,
-               val type: UserType, val pdmId: String? = null, var active: Boolean = false) {
+data class UserData(val id: String? = null, var name: String, var email: String, var password: String,
+               var type: UserType, var pdmId: String? = null, var active: Boolean = false) {
 }
